@@ -1,0 +1,183 @@
+name: Code analysys
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  conventional_commit:
+    name: Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      -
+        uses: webiny/action-conventional-commits@8bc41ff4e7d423d56fa4905f6ff79209a78776c7
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [ conventional_commit ]
+    steps:
+      -
+        name: Checkout repository
+        uses: actions/checkout@v4
+      -
+        name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      -
+        name: Install dependencies
+        run: npm ci
+      -
+        name: Build Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+      -
+        name: Build
+        run: npm run build
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    strategy:
+      fail-fast: false
+      matrix:
+        shard-index: [1]
+    steps:
+      -
+        name: Checkout repository
+        uses: actions/checkout@v4
+      -
+        name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      -
+        name: Install dependencies
+        run: npm ci
+      -
+        name: Run Jest tests
+        run: npx jest --ci --maxWorkers=4 --silent --shard=${{ matrix.shard-index }}/${{ strategy.job-total }}
+      -
+        name: Upload blob report to GitHub Actions Artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.shard-index }}
+          path: coverage
+
+  merge-reports:
+    name: Merge Reports
+    if: ${{ !cancelled() }}
+    needs: [ test ]
+    runs-on: ubuntu-latest
+    steps:
+      -
+        uses: actions/checkout@v4
+      -
+        name: Download reports from GitHub Actions Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: coverages
+          pattern: coverage-*
+      -
+        name: Upload coverage
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report $(find . -name 'lcov*.info' | sed 's,^, -r ,' | xargs echo)
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    steps:
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      -
+        name: Build
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75
+        with:
+          push: true
+          tags: |
+            ${{ vars.DOCKER_NAMESPACE }}/${{ github.event.repository.name }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ github.ref_name }}-image
+          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}-image
+      -
+        name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@5681af892cd0f4997658e2bacc62bd0a894cf564
+        with:
+          image-ref: '${{ vars.DOCKER_NAMESPACE }}/${{ github.event.repository.name }}:${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      -
+        name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    needs: [ build ]
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    permissions:
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: javascript-typescript
+            build-mode: none
+    steps:
+      -
+        name: Checkout repository
+        uses: actions/checkout@v4
+      -
+        name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+      -
+        name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+  security:
+    name: Snyk Scan
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    steps:
+      -
+        uses: actions/checkout@v4
+      -
+        name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@b98d498629f1c368650224d6d212bf7dfa89e4bf
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --sarif-file-output=snyk.sarif
+      -
+        name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
