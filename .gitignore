@@ -151,3 +151,4 @@ storybook-static/
 # .pnp.*
 
 # End of https://www.toptal.com/developers/gitignore/api/nextjs,vercel,storybookjs,intellij+all,yarn
+certificates
