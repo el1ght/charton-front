@@ -5,11 +5,14 @@ import { useState } from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import toast from "react-hot-toast";
 
-// interface LikeButtonProps {
-//     songId: string;
-// }
+interface LikeButtonProps {
+    // songId: string;
+  size: string;
+}
 
-const LikeButton = () => {
+const LikeButton: React.FC<LikeButtonProps> = ({
+    size,
+}) => {
   const router = useRouter();
 
   const [isLiked, setIsLiked] = useState(false);
@@ -39,7 +42,7 @@ const LikeButton = () => {
 
   return (
     <button onClick={handleLike}>
-      <Icon size={22} />
+      <Icon size={size === "small" ? 22 : 26} />
     </button>
   );
 };

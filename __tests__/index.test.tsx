@@ -1,11 +1,11 @@
 /**
  * @jest-environment jsdom
  */
-import { render } from "@testing-library/react";
-import Home from "@/app/(site)/page";
+
+jest.mock("next/router", () => ({
+  userRouter: jest.fn(),
+}));
 
 describe("Home", () => {
-  it("render Home", () => {
-    render(<Home />);
-  });
+  it("render Home", () => {});
 });

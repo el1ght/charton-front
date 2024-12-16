@@ -1,11 +1,11 @@
 "use client";
 
-import { Song } from "@/types";
 import SongItem from "@/components/SongItem/SongItem";
 import useOnPlay from "@/hooks/useOnPlay";
+import { Track } from "@/client";
 
 interface LikedContentProps {
-  songs: Song[];
+  songs: Track[];
 }
 
 const LikedContent: React.FC<LikedContentProps> = ({ songs }) => {
@@ -15,8 +15,8 @@ const LikedContent: React.FC<LikedContentProps> = ({ songs }) => {
     return <div className="mt-2 text-neutral-400">No songs available.</div>;
   }
   return (
-    <div className={"flex flex-col gap-y-0.5"}>
-      {songs.map((item: Song) => (
+    <div>
+      {songs.map((item: Track) => (
         <SongItem
           key={item.id}
           onClick={(id: string) => onPlay(id)}

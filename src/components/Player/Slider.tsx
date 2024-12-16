@@ -2,24 +2,19 @@
 
 import * as RadixSlider from "@radix-ui/react-slider";
 
-interface VolumeSliderProps {
-  value?: number;
-  onChange?: (value: number) => void;
-}
-
-const VolumeSlider: React.FC<VolumeSliderProps> = ({ value = 5, onChange }) => {
-  const handleChange = (newValue: number[]) => {
-    onChange?.(newValue[0]);
-  };
+const Slider = (value: any, onChange: any) => {
+  // const handleChange = (newValue: any) => {
+  //
+  // };
 
   return (
     <RadixSlider.Root
       className={
         "relative flex items-center select-none touch-none w-full h-10"
       }
-      defaultValue={[1]}
-      value={[value]}
-      onValueChange={handleChange}
+      defaultValue={[0.8]}
+      value={value}
+      onValueChange={(value) => onChange?.(value[0])}
       max={50}
       step={1}
       aria-label={"Volume"}
@@ -35,4 +30,4 @@ const VolumeSlider: React.FC<VolumeSliderProps> = ({ value = 5, onChange }) => {
   );
 };
 
-export default VolumeSlider;
+export default Slider;

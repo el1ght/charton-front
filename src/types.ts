@@ -16,14 +16,14 @@ export interface Product {
   image?: string;
 }
 
-export interface Song {
-  id: string;
-  user_id: string;
-  author: string;
-  title: string;
-  image_path: string;
-  url: string;
-}
+// export interface Song {
+//   id: string;
+//   user_id: string;
+//   author: string;
+//   title: string;
+//   image_path: string;
+//   url: string;
+// }
 
 export interface Price {
   id: string;

@@ -7,6 +7,7 @@ import {
   $debug,
   init as initSDK,
   expandViewport,
+  retrieveLaunchParams,
 } from "@telegram-apps/sdk-react";
 
 /**
@@ -30,6 +31,15 @@ export function init(debug: boolean): void {
   void viewport.mount().catch((e) => {
     console.error("Something went wrong mounting the viewport", e);
   });
+
+  // const { initDataRaw } = retrieveLaunchParams();
+
+  // fetch('https://example.com/api', {
+  //   method: "POST",
+  //   headers: {
+  //     Authorization: `tma ${initDataRaw}`
+  //   },
+  // });
 
   expandViewport();
 

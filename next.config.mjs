@@ -17,6 +17,18 @@ const nextConfig = {
         port: '',
         pathname: '/file/charton-thumbnails/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.scdn.co',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn5.cdn-telegram.org',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

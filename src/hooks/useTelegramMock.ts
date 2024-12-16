@@ -47,8 +47,6 @@ export function useTelegramMock(): void {
         ["chat_instance", "8428209589180549439"],
       ]).toString();
 
-      console.log(initDataRaw);
-
       lp = {
         themeParams: {
           accentTextColor: "#6ab2f2",

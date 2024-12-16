@@ -30,5 +30,8 @@ export function Page({
     });
   }, [router]);
 
-  return <div className={"pb-20"}>{children}</div>;
+  return <div className={"pb-40 relative"}>
+    {children}
+    <p className={"absolute left-[50%] translate-x-[-50%] bottom-32 text-color"}>(◕‿‿◕｡)</p>
+  </div>;
 }

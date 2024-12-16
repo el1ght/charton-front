@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { Song } from "@/types";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
 import { IoClose, IoPlaySkipBack, IoPlaySkipForward } from "react-icons/io5";
 import usePlayer from "@/hooks/usePlayerStore";
@@ -16,11 +15,12 @@ import { FaPlus } from "react-icons/fa";
 import { TbRepeat } from "react-icons/tb";
 import { PiShuffleBold } from "react-icons/pi";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
-import VolumeSlider from "./VolumeSlider";
 import { useLaunchParams } from "@telegram-apps/sdk-react";
+import { Track } from "@/client";
+import ProgressCompact from "./ProgressCompact";
 
 interface PlayerContentProps {
-  song: Song;
+  song: Track;
   songUrl: string;
   expand: boolean;
   setExpand: Dispatch<SetStateAction<boolean>>;
@@ -29,21 +29,20 @@ interface PlayerContentProps {
 const PlayerContent: React.FC<PlayerContentProps> = ({
   song,
   expand,
+  songUrl: songUrl,
   setExpand,
 }) => {
   const lp = useLaunchParams();
 
   const player = usePlayer();
-
   const title = song.title;
-  const author = song.author;
 
   // const {isPlaying, setIsPlaying} = usePlayerStore();
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
 
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(10);
   const [shuffled, setShuffled] = useState(false);
   const [looped, setLooped] = useState(false);
 
@@ -91,6 +90,16 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
 
     setDuration(seconds);
   }, [audioRef?.current?.onloadedmetadata, audioRef?.current?.readyState]);
+
+  useEffect(() => {
+    if (audioRef) {
+      if ("volume" in audioRef.current!) {
+        if ("volume" in audioRef.current) {
+          audioRef.current.volume = volume / 100;
+        }
+      }
+    }
+  }, [volume, audioRef]);
 
   const changeProgress = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAudioProgress(Number(e.target.value));
@@ -144,20 +153,28 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
 
   const toggleMute = () => {
     if (volume === 0) {
-      setVolume(1);
+      setVolume(10);
     } else {
       setVolume(0);
     }
+  };
+  const handleShuffle = () => {
+    if (!shuffled) {
+      player.shuffle();
+      console.log(player.ids);
+    }
+    setShuffled(!shuffled);
+    setLooped(false);
   };
 
   return (
     <>
       <div
-        className={`absolute flex justify-between  overflow-hidden ${expand ? "m-0 bottom-0 top-0 w-full h-full transition-all " : `${lp?.platform === "ios" ? "bottom-[100px]" : "bottom-[88px]"} right-2 left-2`}`}
+        className={`z-[3] absolute flex justify-between  overflow-hidden ${expand ? `m-0 top-0 w-full h-full transition-all ` : `${lp?.platform === "ios" ? "bottom-[100px]" : "bottom-[88px]"} right-2 left-2`}`}
       >
         <div className={`overflow-hidden w-full`}>
           <div
-            className={`border-b relative w-full  section-separator-color-border shadow overflow-hidden transition-all ${expand ? "h-full rounded-none  secondary-bg-color p-3" : "section-bg-color rounded-3xl p-1"}`}
+            className={`border-b border-x relative w-full  section-separator-color-border shadow overflow-hidden transition-all ${expand ? `h-full rounded-none  secondary-bg-color p-3 pb-0 border-none ${lp?.platform === "ios" ? "pb-5" : "pb-2"}` : "section-bg-color rounded-3xl p-1"}`}
           >
             {expand ? (
               <>
@@ -185,15 +202,25 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
                         </button>
                       </div>
                     </div>
-                    <Image
-                      src={song.image_path}
-                      alt={"image"}
-                      width={150}
-                      height={150}
+                    <div
                       className={
-                        "rounded-3xl filter h-52 w-52 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"
+                        "rounded-3xl border section-separator-color-border section-bg-color h-60 w-60 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"
                       }
-                    />
+                    >
+                      <div
+                        className={
+                          "rounded-3xl bg-black h-52 w-52 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"
+                        }
+                      >
+                        <Image
+                          src={song.thumbnail}
+                          alt={"image"}
+                          width={150}
+                          height={150}
+                          className={"rounded-3xl w-full h-full "}
+                        />
+                      </div>
+                    </div>
 
                     <div className={""} onDoubleClick={() => {}}></div>
 
@@ -201,13 +228,14 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
                   </div>
                   <div
                     className={
-                      "p-6 border section-bg-color section-separator-color-border rounded-[30px]"
+                      "p-6 border section-bg-color section-separator-color-border rounded-3xl"
                     }
                   >
                     <div className={"text-center mb-3"}>
                       <h2 className={"text-color font-medium"}>{song.title}</h2>
                       <p className={"subtitle-text-color text-[12px]"}>
-                        {song.author}
+                        {song.authors &&
+                          song.authors.map((author) => author.name).join(", ")}
                       </p>
                     </div>
                     <div
@@ -236,7 +264,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
                   </div>
                   <div
                     className={
-                      "rounded-full p-3 border section-bg-color section-separator-color-border flex items-center justify-center sm:justify-between"
+                      "rounded-3xl p-3 border section-bg-color section-separator-color-border flex items-center justify-center sm:justify-between"
                     }
                   >
                     <div
@@ -281,10 +309,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
                         <IoPlaySkipForward size={16} className={"text-color"} />
                       </div>
                       <div
-                        onClick={function () {
-                          setShuffled(!shuffled);
-                          setLooped(false);
-                        }}
+                        onClick={handleShuffle}
                         className={`shadow-xl flex items-center justify-center rounded-full cursor-pointer p-4 transition ${shuffled ? "button-color" : "section-separator-color"}`}
                       >
                         <PiShuffleBold size={16} className={"text-color"} />
@@ -300,9 +325,15 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
                         onClick={toggleMute}
                         className={"cursor-pointer text-color"}
                       />
-                      <VolumeSlider
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
                         value={volume}
-                        onChange={(value) => setVolume(value)}
+                        onChange={(e) => setVolume(Number(e.target.value))}
+                        className={
+                          "w-[80px] h-[5px] progress-bar section-separator-color"
+                        }
                       />
                     </div>
                   </div>
@@ -311,31 +342,30 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
             ) : (
               <>
                 <div>
-                  <div
-                    className={
-                      "w-full h-[2px] absolute top-0 left-0 subtitle-text-color-bg"
-                    }
-                  >
-                    <div
-                      className={"inner-line button-color"}
-                      ref={progressRef}
-                    ></div>
-                  </div>
+                  {/*<ProgressCompact refValue={progressRef} />*/}
+                  <ProgressCompact />
 
                   <div className={"flex items-center justify-between gap-x-2"}>
                     <div
                       onClick={() => setExpand(true)}
                       className={"flex gap-x-2 items-center cursor-pointer p-1"}
                     >
-                      <Image
-                        src={song.image_path}
-                        alt={"image"}
-                        width={30}
-                        height={30}
-                        className={"w-[60px] h-[60px] rounded-3xl"}
-                      />
-                      <div className={""}>
-                        <p className={"text-[15px] truncate text-color"}>
+                      <div className={"w-[60px] h-[60px] bg-black rounded-3xl"}>
+                        <Image
+                          src={song.thumbnail}
+                          alt={"image"}
+                          width={150}
+                          height={150}
+                          className={"w-full h-full rounded-3xl"}
+                        />
+                      </div>
+
+                      <div className={"max-w-[35vw]"}>
+                        <p
+                          className={
+                            "max-w-[35vw] text-[15px] truncate text-color font-semibold"
+                          }
+                        >
                           {title}
                         </p>
                         <p
@@ -343,7 +373,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
                             "subtitle-text-color truncate text-[12px] block"
                           }
                         >
-                          {author}
+                          {song.authors.map((author) => author.name).join(", ")}
                         </p>
                       </div>
                     </div>
@@ -355,13 +385,13 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
                     >
                       <div
                         onClick={togglePlayPause}
-                        className={`cursor-pointer flex items-center justify-center shadow-xl transition rounded-2xl p-4  ${!isPlaying ? "button-color" : "section-separator-color"}`}
+                        className={`cursor-pointer flex items-center justify-center shadow-xl transition rounded-3xl p-4  ${!isPlaying ? "button-color" : "section-separator-color"}`}
                       >
                         <Icon size={24} className={"text-color"} />
                       </div>
                       <div
                         onClick={onPlayNext}
-                        className={`shadow-xl flex items-center justify-center transition rounded-2xl cursor-pointer p-5 section-separator-color`}
+                        className={`shadow-xl flex items-center justify-center transition rounded-3xl cursor-pointer p-5 section-separator-color`}
                       >
                         <IoPlaySkipForward size={16} className={"text-color"} />
                       </div>
@@ -376,8 +406,9 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
               ref={audioRef}
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleLoadedMetadata}
-              src={song.url}
+              src={songUrl}
               onEnded={onPlayNext}
+              loop={looped}
             />
           </div>
         </div>

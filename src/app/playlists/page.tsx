@@ -5,11 +5,21 @@ import { FaPlay } from "react-icons/fa6";
 import Link from "next/link";
 import { FaPlus } from "react-icons/fa";
 import { Page } from "@/components/Page";
-import { Button } from "@telegram-apps/telegram-ui";
+import { Button, Modal } from "@telegram-apps/telegram-ui";
+import { ModalHeader } from "@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader";
+import { useState } from "react";
+import Input from "@/components/Input/Input";
 
 const Playlists = () => {
+  const [playlistName, setPlaylistName] = useState("");
+
   const handleClick = () => {
     console.log("click");
+  };
+
+  const handleCreatePlaylist = () => {
+    console.log("sent: ", playlistName);
+    setPlaylistName("");
   };
 
   return (
@@ -35,14 +45,39 @@ const Playlists = () => {
           </h2>
         </div>
         <div className={"flex flex-col gap-y-1"}>
-          <Button
-            onClick={handleClick}
-            before={<FaPlus />}
-            mode="filled"
-            size="m"
+          <Modal
+            className={`px-5 flex justify-center pb-6`}
+            header={<ModalHeader>Create Playlist</ModalHeader>}
+            trigger={
+              <Button
+                onClick={handleClick}
+                before={<FaPlus />}
+                mode="filled"
+                size="l"
+              >
+                New Playlist
+              </Button>
+            }
           >
-            New Playlist
-          </Button>
+            <Input
+              className={"border-2 section-separator-color-border mb-1"}
+              placeholder="Let's call it..."
+              value={playlistName}
+              onChange={(e) => setPlaylistName(e.target.value)}
+            />
+            <Modal.Close>
+              <Button
+                onClick={handleCreatePlaylist}
+                mode="filled"
+                size="l"
+                stretched
+                disabled={playlistName.length <= 3 && true}
+              >
+                Create
+              </Button>
+            </Modal.Close>
+          </Modal>
+
           <Link
             href={"/liked"}
             className={
@@ -61,7 +96,7 @@ const Playlists = () => {
                 <p className={"font-semibold leading-4 text-color"}>
                   Favourites
                 </p>
-                <p className={"text-[12px] subtitle-text-color"}>52 Tracks</p>
+                <p className={"text-[12px] subtitle-text-color"}>No tracks(</p>
               </div>
             </div>
             <FaPlay size={20} className={"text-color"} />

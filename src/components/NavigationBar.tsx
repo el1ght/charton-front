@@ -14,7 +14,7 @@ const NavigationBar = () => {
 
   return (
     <div
-      className={`${lp?.platform === "ios" ? "bottom-5" : "bottom-2"} left-2 right-2 absolute flex p-1 section-bg-color section-separator-color-border rounded-3xl justify-between items-center shadow border`}
+      className={`${lp?.platform === "ios" ? "bottom-5" : "bottom-2"} left-2 right-2 absolute flex p-1 section-bg-color section-separator-color-border rounded-3xl justify-between items-center shadow border z-[3]`}
     >
       <Link
         href={"/search"}

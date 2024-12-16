@@ -12,10 +12,14 @@ import NavigationBar from "@/components/NavigationBar";
 import ToasterProvider from "@/providers/ToasterProvider";
 import Content from "@/components/Content";
 import Player from "@/components/Player/Player";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import useState from "react";
+import React from "react";
+import Providers from "@/app/providers";
 
 export const metadata: Metadata = {
-  title: "Your Application Title Goes Here",
-  description: "Your application description goes here",
+  title: "Charton",
+  description: "New Age Music App just in Telegram",
 };
 
 export default async function RootLayout({ children }: PropsWithChildren) {
@@ -24,19 +28,17 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang={locale}>
       <body>
-        <I18nProvider>
-          <ToasterProvider />
+      <I18nProvider>
+        <Providers>
           <Root>
             <div className={"relative h-[100vh] flex flex-col"}>
               <Content>{children}</Content>
-              {/*<div className={'h-[100vh] overflow-y-auto text-color'}>*/}
-
-              {/*</div>*/}
               <NavigationBar />
             </div>
             <Player />
           </Root>
-        </I18nProvider>
+        </Providers>
+      </I18nProvider>
       </body>
     </html>
   );
