@@ -1,14 +1,12 @@
-import { Song } from "@/types";
 import usePlayer from "./usePlayerStore";
+import { Track } from "@/client";
 
-const useOnPlay = (songs: Song[]) => {
+const useOnPlay = (songs: Track[]) => {
   const player = usePlayer();
-
   const onPlay = (id: string) => {
     // if (!user) {
     //     return authModal.onOpen();
     // }
-    console.log("tap tap tap");
 
     player.setId(id);
     player.setIds(songs.map((song) => song.id));

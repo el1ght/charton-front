@@ -85,7 +85,7 @@ export default function InitDataPage() {
       { title: "username", value: username },
       { title: "photo_url", value: photoUrl },
     ];
-  }, [initDataState.chat]);
+  }, [initDataState?.chat]);
 
   if (!initDataRows) {
     return (

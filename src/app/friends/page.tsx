@@ -9,18 +9,16 @@ import { Button } from "@telegram-apps/telegram-ui";
 import { IoPeople } from "react-icons/io5";
 
 const Friends = () => {
-  const base = "https://chart.ton/referral?7777777";
+  const botUrl = process.env.NEXT_PUBLIC_BOT_URL;
+  const refCode = "123";
+  const refLink =
+    botUrl + `/${process.env.NEXT_PUBLIC_BOT_APP_NAME}?startapp=${refCode}`;
+  const shareText = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=Join my app!`;
 
   const copylink = () => {
-    navigator.clipboard.writeText(base);
+    navigator.clipboard.writeText(refLink);
     toast.success("Copied!");
   };
-
-  const botUrl = "https://t.me/testingofyourassbot";
-  // boturl & appname through env
-  const refCode = "123";
-  const refLink = botUrl + `/app?startapp=${refCode}`;
-  const shareText = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=Join my app!`;
 
   const handleClick = () => {
     openTelegramLink(shareText);
@@ -57,7 +55,7 @@ const Friends = () => {
           }
           onClick={copylink}
         >
-          https://acing.music.ton/referral?7777777
+          {refLink}
           <FiClipboard
             size={20}
             className={

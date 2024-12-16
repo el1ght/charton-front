@@ -1,62 +1,16 @@
 "use client";
 
-import LikedContent from "./components/LikedContent";
 import Image from "next/image";
-import { FaPlay, FaRepeat, FaShuffle } from "react-icons/fa6";
+import { FaPlay } from "react-icons/fa6";
 import { Page } from "@/components/Page";
-
-const mockSongs = [
-  {
-    id: "1",
-    user_id: "el1ght",
-    author: "Ponomaryov",
-    title: "Ukraine",
-    image_path:
-      "https://f003.backblazeb2.com/file/charton-thumbnails/512x512bb.webp",
-    url: "https://charton-tracks.s3.eu-central-003.backblazeb2.com/Oleksandr+Ponomaryov.mp3",
-  },
-  {
-    id: "2",
-    user_id: "el1ght",
-    author: "Lana Del Rey",
-    title: "Off to the Races",
-    image_path:
-      "https://f003.backblazeb2.com/file/charton-thumbnails/512x512bb.webp",
-    url: "https://f003.backblazeb2.com/file/charton-tracks/Lana-Del-Rey-%E2%80%93-Off-To-The-Races.m4a",
-  },
-  {
-    id: "3",
-    user_id: "el1ght",
-    author: "Madza",
-    title: "Late Night Drive",
-    image_path:
-      "https://f003.backblazeb2.com/file/charton-thumbnails/512x512bb.webp",
-    url: "https://audioplayer.madza.dev/Madza-Late_Night_Drive.mp3",
-  },
-  {
-    id: "4",
-    user_id: "el1ght",
-    author: "Madza",
-    title: "Chords of Life",
-    image_path:
-      "https://f003.backblazeb2.com/file/charton-thumbnails/512x512bb.webp",
-    url: "https://audioplayer.madza.dev/Madza-Chords_of_Life.mp3",
-  },
-  {
-    id: "5",
-    user_id: "el1ght",
-    author: "Madza",
-    title: "Persistence",
-    image_path:
-      "https://f003.backblazeb2.com/file/charton-thumbnails/512x512bb.webp",
-    url: "https://audioplayer.madza.dev/Madza-Persistence.mp3",
-  },
-];
+import { MdDelete } from "react-icons/md";
+import { IoIosShareAlt } from "react-icons/io";
 
 const Liked = () => {
+
   return (
     <Page back={true}>
-      <div className={"px-3 py-5 box flex flex-col gap-y-8 pb-20 text-color"}>
+      <div className={"px-3 py-5 box flex flex-col gap-y-8 text-color"}>
         <div className={"flex justify-center items-center flex-col gap-y-2"}>
           <div
             className={
@@ -72,7 +26,7 @@ const Liked = () => {
             />
           </div>
 
-          <h2 className={"text-center text-[1.2rem] font-bold"}>Liked Songs</h2>
+          <h2 className={"text-center text-[1.2rem] font-bold outline-none"}>Liked Songs</h2>
 
           <div className={"flex flex-col items-center mb-4"}>
             <div className={"flex gap-x-2 items-center"}>
@@ -90,7 +44,7 @@ const Liked = () => {
                 "w-[50px] h-[50px] section-bg-color rounded-full flex items-center justify-center"
               }
             >
-              <FaRepeat size={20} />
+              <MdDelete size={20} />
             </button>
             <button
               className={
@@ -104,12 +58,12 @@ const Liked = () => {
                 "w-[50px] h-[50px] section-bg-color rounded-full flex items-center justify-center"
               }
             >
-              <FaShuffle size={20} />
+              <IoIosShareAlt size={20} />
             </button>
           </div>
         </div>
 
-        <LikedContent songs={mockSongs} />
+        {/*<LikedContent songs={mockSongs} />*/}
       </div>
     </Page>
   );
